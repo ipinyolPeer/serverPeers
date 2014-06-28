@@ -15,6 +15,7 @@ public class PeerTest {
     Date creation = new Date();
     Date lastCon = new Date();
     Date lastMessage = new Date();
+    String eMail = "test@test.com";
     
     @Before
     public void setUp() throws Exception {
@@ -23,6 +24,7 @@ public class PeerTest {
         peer.setCreationDate(creation);
         peer.setLastConnection(lastCon);
         peer.setLastMessage(lastMessage);
+        peer.setEMail(eMail);
     }
     
     @After
@@ -47,5 +49,10 @@ public class PeerTest {
     @Test
     public void testCreationDate() {
         assertEquals(creation, peer.getCreationDate());
+    }
+    
+    @Test
+    public void testGetEMail() {
+        assertEquals(eMail, peer.getEMail());
     }
 }

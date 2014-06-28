@@ -13,6 +13,4 @@ public class AbstractController {
 	    @Inject protected MainDB db;
 	    @Inject protected EntityManager em;
 
-	    
-
 }

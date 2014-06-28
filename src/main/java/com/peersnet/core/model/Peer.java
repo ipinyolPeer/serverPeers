@@ -12,6 +12,8 @@ import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.validator.constraints.Email;
+import org.hibernate.validator.constraints.NotEmpty;
 
 @Entity
 public class Peer implements Serializable{
@@ -36,6 +38,12 @@ public class Peer implements Serializable{
     @Temporal(TemporalType.TIMESTAMP)
     @NotNull
     private Date creationDate;
+    
+    @NotNull
+    @NotEmpty
+    @Email(message = "Invalid format")
+    @Column(unique = true)
+    private String eMail;
     
     public String getUUID() {
         return this.UUID;
@@ -67,6 +75,14 @@ public class Peer implements Serializable{
     
     public void setCreationDate(Date creationDate) {
         this.creationDate = creationDate;
+    }
+    
+    public String getEMail() {
+        return eMail;
+    }
+
+    public void setEMail(String eMail) {
+        this.eMail = eMail;
     }
     private static final long serialVersionUID = 1L;
 
