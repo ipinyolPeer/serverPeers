@@ -10,4 +10,5 @@ static public final String VERSION = "agora";
     // The EndPonts URLS of the API
     static public final String doEcho = "/doEcho";
     static public final String newPeer = "/newPeer";
+    static public final String getPeer = "/getPeer";
 }

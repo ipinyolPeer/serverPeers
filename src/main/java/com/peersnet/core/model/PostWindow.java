@@ -32,11 +32,11 @@ public class PostWindow implements Serializable {
     private Long id;
     
     @ManyToOne(optional=false) 
-    @JoinColumn(name="UUID", nullable=false, updatable=true)
+    @JoinColumn(name="UUID_peer", nullable=false, updatable=true)
     private Peer to;
     
-    //@ManyToOne(optional=false) 
-    //@JoinColumn(name="UUID", nullable=false, updatable=true)
+    @ManyToOne(optional=false) 
+    @JoinColumn(name="UUID_post", nullable=false, updatable=true)
     private Post post;
     
     @NotNull

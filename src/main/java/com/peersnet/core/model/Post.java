@@ -3,6 +3,7 @@ package com.peersnet.core.model;
 import java.util.Date;
 
 import javax.persistence.Column;
+import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
@@ -13,18 +14,19 @@ import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.GenericGenerator;
 
+@Entity
 public class Post {
     
     // The ID. We use UUIDs
     @Id
-    @GeneratedValue(generator="system-uuid")
-    @GenericGenerator(name="system-uuid", strategy = "uuid")
+    @GeneratedValue(generator="system-uuid-post")
+    @GenericGenerator(name="system-uuid-post", strategy = "uuid")
     @Column(name = "uuid", unique = true)
     private String UUID;
     
     // The source of the post
     @ManyToOne(optional=false) 
-    @JoinColumn(name="UUID", nullable=false, updatable=true)
+    @JoinColumn(name="UUID_peer", nullable=false, updatable=true)
     private Peer from;
     
     // The literal message
@@ -38,7 +40,7 @@ public class Post {
     
     // A possible reference to another post
     @ManyToOne(optional=true) 
-    @JoinColumn(name="UUID", nullable=true, updatable=true)
+    @JoinColumn(name="UUID_post", nullable=true, updatable=true)
     private Post referTo;
     
     // The TIMESTAMP of the creation of the post

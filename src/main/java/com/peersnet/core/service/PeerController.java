@@ -77,4 +77,12 @@ public class PeerController extends AbstractController {
         }
     }
     
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    public Peer getPeer(String UUID) throws EntityNotFoundException {
+        Peer peer = this.db.getPeerDB().findById(UUID);
+        if (peer == null) {
+            throw new EntityNotFoundException();  
+        }
+        return peer;
+    }
 }
