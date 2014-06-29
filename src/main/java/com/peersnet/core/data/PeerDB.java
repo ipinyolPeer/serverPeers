@@ -20,12 +20,15 @@ public class PeerDB {
     
     /**
      * Returns a {@link Peer} from the given UUID
-     * @param UUID
-     *      The UUID of the {@link Peer}  
-     * @author iMath
+     * @param UUID The UUID of the {@link Peer}
+     * @author ipinyol
      */
     public Peer findById(String UUID) {
         em.flush();
-        return em.find(Peer.class, UUID);
+        try {
+            return em.find(Peer.class, UUID);
+        } catch (Exception e) {
+            return null;
+        }
     }
 }

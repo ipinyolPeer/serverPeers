@@ -8,13 +8,15 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-@Path("/echo")
+import com.peersnet.core.util.Constants;
+
+@Path(Constants.baseURL)
 @RequestScoped
 @Stateful
 public class EchoRest {
 
     @GET
-    @Path("/doEcho/{stuff}")
+    @Path(Constants.doEcho + "/{stuff}")
     @Produces(MediaType.APPLICATION_JSON)
     public String doEcho(@PathParam("stuff") String stuff) {
         return stuff;

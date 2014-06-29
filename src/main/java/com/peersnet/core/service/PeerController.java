@@ -5,6 +5,8 @@ import java.util.Date;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
+import javax.persistence.EntityNotFoundException;
+import javax.persistence.PersistenceException;
 
 import com.peersnet.core.model.Peer;
 
@@ -35,9 +37,44 @@ public class PeerController extends AbstractController {
         return peer;
     }
     
+    /**
+     * Updates the date of the last connection
+     * @param UUID
+     * @throws EntityNotFoundException if the entity is not found
+     * @throws PersistenceException if there is an error when persisting the entity
+     */
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-    public void setLastConnection(String UUID) throws Exception {
-        
+    public void setLastConnection(String UUID) throws EntityNotFoundException, PersistenceException {
+        Peer peer = this.db.getPeerDB().findById(UUID);
+        if (peer == null) {
+            throw new EntityNotFoundException();  
+        }
+        peer.setLastConnection(new Date());
+        try {
+            this.db.makePersistent(peer);
+        } catch (Exception e) {
+            throw new PersistenceException();
+        }
+    }
+    
+    /**
+     * Updates the date of the last message sent
+     * @param UUID
+     * @throws EntityNotFoundException if the entity is not found
+     * @throws PersistenceException if there is an error when persisting the entity
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    public void setLastMessage(String UUID) throws EntityNotFoundException, PersistenceException {
+        Peer peer = this.db.getPeerDB().findById(UUID);
+        if (peer == null) {
+            throw new EntityNotFoundException();  
+        }
+        peer.setLastMessage(new Date());
+        try {
+            this.db.makePersistent(peer);
+        } catch (Exception e) {
+            throw new PersistenceException();
+        }
     }
     
 }

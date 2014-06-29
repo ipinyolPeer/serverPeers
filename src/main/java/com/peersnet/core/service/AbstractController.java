@@ -13,4 +13,14 @@ public class AbstractController {
 	    @Inject protected MainDB db;
 	    @Inject protected EntityManager em;
 
+	    
+	    // For testing purposes only, to simulate injection
+	    public void setMainDB(MainDB db) {
+	        this.db = db;
+	    }
+	    
+	    // For testing purposes only, to simulate injection    
+	    public void setLog(Logger LOG) {
+	        this.LOG = LOG;
+	    }
 }
