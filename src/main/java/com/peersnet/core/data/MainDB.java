@@ -9,14 +9,24 @@ public class MainDB {
 
 	@Inject private EntityManager em;
 	@Inject private PeerDB peerDB;
+	@Inject private PostDB postDB;
 	
 	public void makePersistent(Object obj) throws Exception {
-	    	em.persist(obj);
-	    	em.flush();
+	    em.persist(obj);
+	    em.flush();
 	 }
+	
+	public void delete(Object obj) throws Exception {
+	    em.remove(obj);
+	    em.flush();
+	}
 	
 	public PeerDB getPeerDB() {
 	    return this.peerDB;
+	}
+	
+	public PostDB getPostDB() {
+	    return this.postDB;
 	}
 	
 	// For testing purposes only
@@ -28,4 +38,7 @@ public class MainDB {
 	    this.peerDB = peerDB;
 	}
 	
+	public void setPostDB(PostDB postDB) {
+	    this.postDB = postDB;
+	}
 }
