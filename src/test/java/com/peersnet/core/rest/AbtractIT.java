@@ -16,6 +16,7 @@ import com.peersnet.core.model.PostWindow;
 import com.peersnet.core.service.AbstractController;
 import com.peersnet.core.service.PeerController;
 import com.peersnet.core.service.PostController;
+import com.peersnet.core.service.PostWindowController;
 import com.peersnet.core.util.Constants;
 import com.peersnet.core.util.MapUtils;
 import com.peersnet.core.util.Resources;
@@ -26,10 +27,10 @@ public abstract class AbtractIT {
     public static Archive<?> createTestArchive() {
        return ShrinkWrap.create(WebArchive.class, "test.war")
                .addClasses(MainDB.class, PostDB.class, PeerDB.class, PostWindowDB.class, Peer.class, Post.class, PostWindow.class,
-                       EchoRest.class, JaxRsActivator.class, PeerRest.class,
-                       AbstractController.class, PeerController.class, PostController.class, PostWindow.class,
+                       EchoRest.class, JaxRsActivator.class, PeerRest.class, PostWindowRest.class,
+                       AbstractController.class, PeerController.class, PostController.class, PostWindowController.class,
                        Constants.class, MapUtils.class, Resources.class,
-                       AbtractIT.class, PeerRestIT.class)
+                       AbtractIT.class, PeerRestIT.class, PostWindowRestIT.class)
                .addAsResource("META-INF/persistence.xml", "META-INF/persistence.xml")
                .addAsWebInfResource("arquillian-ds.xml")
                .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml");

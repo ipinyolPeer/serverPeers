@@ -11,4 +11,6 @@ static public final String VERSION = "agora";
     static public final String doEcho = "/doEcho";
     static public final String newPeer = "/newPeer";
     static public final String getPeer = "/getPeer";
+    
+    static public final String post = "/post";
 }
