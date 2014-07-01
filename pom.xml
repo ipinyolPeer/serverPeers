@@ -146,6 +146,11 @@
     </dependencyManagement>
     
     <dependencies>
+    	<dependency>  
+        	<groupId>org.jboss.shrinkwrap.resolver</groupId>  
+        	<artifactId>shrinkwrap-resolver-impl-maven</artifactId>  
+        	<scope>test</scope>  
+    	</dependency>  
         <!-- First declare the APIs we depend on and need for compilation. All of them are provided by JBoss -->
 
         <!-- Import the CDI API, we use provided scope as the API is included in JBoss -->
