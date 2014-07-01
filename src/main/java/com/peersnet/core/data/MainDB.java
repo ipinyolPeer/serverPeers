@@ -10,6 +10,7 @@ public class MainDB {
 	@Inject private EntityManager em;
 	@Inject private PeerDB peerDB;
 	@Inject private PostDB postDB;
+	@Inject private PostWindowDB postWindowDB;
 	
 	public void makePersistent(Object obj) throws Exception {
 	    em.persist(obj);
@@ -29,6 +30,10 @@ public class MainDB {
 	    return this.postDB;
 	}
 	
+	public PostWindowDB getPostWindowDB() {
+	    return this.postWindowDB;
+	}
+	
 	// For testing purposes only
 	public void setEntityManager(EntityManager em) {
 	    this.em = em;
@@ -40,5 +45,9 @@ public class MainDB {
 	
 	public void setPostDB(PostDB postDB) {
 	    this.postDB = postDB;
+	}
+	
+	public void setPostWindowDB(PostWindowDB postWindowDB) {
+	    this.postWindowDB = postWindowDB;
 	}
 }
