@@ -102,7 +102,7 @@ public class PostWindowRestIT extends AbtractIT {
         Response resp = postWindowRest.newPost(sc, null);
         assertEquals(resp.getStatus(),Response.Status.BAD_REQUEST.getStatusCode());
         
-        /*
+        
         // we check that the given refereed post does not exists we get a Bad Request
         Peer peer = peerController.newPeer("testtt@test.com");
         String UUID_peer = peer.getUUID();
@@ -142,7 +142,7 @@ public class PostWindowRestIT extends AbtractIT {
         PostWindowRest.ReturnPostDTO retDTO = (PostWindowRest.ReturnPostDTO) resp.getEntity();
         assertEquals(retDTO.numberOfMessages,0);
         assertEquals(retDTO.notSent.size(),1);
-        assertEquals(retDTO.notSent.get(0), UUID_bad );*/
+        assertEquals(retDTO.notSent.get(0), UUID_bad );
     }
     
 }

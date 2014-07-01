@@ -57,15 +57,15 @@ public class PostWindowRest {
         
         // We check that the peer exists
         try {
-            peerController.getPeer(UUID_from);
-        } catch (EntityNotFoundException e) {
+            Peer p = peerController.getPeer(UUID_from);
+        } catch (Exception e) {
             return Response.status(Response.Status.BAD_REQUEST).build();        
         }
         // We check that if UUID_referTo is informed,the Post really exists
         if (postWinDTO.UUID_referTo!=null) {
             try {
-                postController.getPost(postWinDTO.UUID_referTo);
-            } catch (EntityNotFoundException e) {
+                Post p = postController.getPost(postWinDTO.UUID_referTo);
+            } catch (Exception e) {
                 return Response.status(Response.Status.BAD_REQUEST).build();
             }
         }
