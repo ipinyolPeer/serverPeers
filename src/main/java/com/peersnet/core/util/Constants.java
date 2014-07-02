@@ -13,4 +13,5 @@ static public final String VERSION = "agora";
     static public final String getPeer = "/getPeer";
     
     static public final String post = "/post";
+    static public final String getPost = "/getPosts";
 }

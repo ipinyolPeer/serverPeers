@@ -1,6 +1,8 @@
 package com.peersnet.core.service;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
@@ -51,6 +53,11 @@ public class PostWindowController extends AbstractController {
         if (postWin.getState().equals(state)) {
             throw new PersistenceException("changeState called with the same state");
         }
+        chageStateBasic(postWin, state);
+    }
+    
+    // Transaction is required!
+    private void chageStateBasic(PostWindow postWin, PostWindow.State state) throws PersistenceException {
         postWin.setState(state);
         postWin.setLastChange(new Date());
         try {
@@ -89,6 +96,29 @@ public class PostWindowController extends AbstractController {
         } catch (Exception e) {
             throw new PersistenceException();
         }
+    }
+    
+    /**
+     * Get the List of {@link Post} whose destiny is UUID_to and with state currState
+     * and updates the state of all PostWindow entities to newState
+     * @param UUID_to       The UUID of the Peer
+     * @param currState     The state of the PostWindow 
+     * @param newState      The new state to be updated
+     * @return              List of Post messages for Peer with state currState
+     * @throws PersistenceException When there is an error trying to persist the {@link PostWindow} entity 
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    public List<Post> getPostsByToAndState(String UUID_to, PostWindow.State currState, PostWindow.State newState) throws PersistenceException{
+        List<PostWindow> postWinList = db.getPostWindowDB().findByToAndState(UUID_to, currState);
+        List<Post> posts = new ArrayList<Post>();
+        for (PostWindow postWin:postWinList) {
+            Post post = postWin.getPost();
+            posts.add(post);
+            if (currState!=newState) {
+                chageStateBasic(postWin, newState);
+            }
+        }
+        return posts;
     }
     
     // Only for testing purposes

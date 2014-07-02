@@ -1,6 +1,7 @@
 package com.peersnet.core.rest;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
@@ -41,6 +42,12 @@ public class PostWindowRest {
     @Inject
     PostController postController;
     
+    /**
+     * Post a new update for a list of Peers
+     * @param sc
+     * @param postWinDTO
+     * @return
+     */
     @POST
     @Path(Constants.post)
     @Consumes(MediaType.APPLICATION_JSON)
@@ -102,6 +109,84 @@ public class PostWindowRest {
         ret.numberOfMessages = count;
         ret.notSent = notSent;
         return Response.status(Response.Status.OK).entity(ret).build();
+    }
+    
+    /**
+     * Gets the Posts of state PENDING for the logged in Peer, and changes the state to SENT
+     * @param sc The SecurityContext
+     * @return
+     */
+    @GET
+    @Path(Constants.getPost)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getPosts(@Context SecurityContext sc) {
+        // We check that the user is authenticated
+        if (sc.getUserPrincipal() == null) {
+            return Response.status(Response.Status.UNAUTHORIZED).build();
+        } else if (sc.getUserPrincipal().getName()==null) {
+            return Response.status(Response.Status.UNAUTHORIZED).build();
+        }
+        String UUID = sc.getUserPrincipal().getName();
+        List<Post> posts = null;
+        try {
+            posts = pwc.getPostsByToAndState(UUID, PostWindow.State.PENDING, PostWindow.State.SENT);
+        }
+        catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        }
+        ReturnPostMessagesDTO ret = new ReturnPostMessagesDTO();
+        ret.convert(posts);
+        return Response.status(Response.Status.OK).entity(ret).build();
+    }
+    
+    /**
+     * POST to indicate that all posts after the call getPosts have been received by the logged in Peer 
+     * @param sc The SecurityContext
+     * @return
+     */
+    @POST
+    @Path(Constants.getPost)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response receivedAllPosts(@Context SecurityContext sc) {
+        if (sc.getUserPrincipal() == null) {
+            return Response.status(Response.Status.UNAUTHORIZED).build();
+        } else if (sc.getUserPrincipal().getName()==null) {
+            return Response.status(Response.Status.UNAUTHORIZED).build();
+        }
+        String UUID = sc.getUserPrincipal().getName();
+        try {
+            pwc.getPostsByToAndState(UUID, PostWindow.State.SENT, PostWindow.State.ACK);
+        }
+        catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        }
+        return Response.status(Response.Status.OK).build();
+    }
+    
+    static public class ReturnPostMessagesDTO {
+        public List<ReturnPostMessageDTO> postsDTO;
+        
+        public void convert(List<Post> posts) {
+            postsDTO = new ArrayList<ReturnPostMessageDTO>();
+            for(Post post:posts) {
+                ReturnPostMessageDTO postDTO = new ReturnPostMessageDTO();
+                postDTO.UUID = post.getUUID();
+                postDTO.message = post.getMessage();
+                postDTO.creationDate = post.getCreationDate();
+                postDTO.UUID_from = post.getFrom().getUUID();
+                postDTO.UUID_referTo = post.getReferTo().getUUID();
+                postsDTO.add(postDTO);
+            }
+        }
+    }
+    
+    static public class ReturnPostMessageDTO {
+        String UUID;
+        Date creationDate;
+        String UUID_from;
+        String message;
+        String UUID_referTo;
     }
     
     static public class ReturnPostDTO{

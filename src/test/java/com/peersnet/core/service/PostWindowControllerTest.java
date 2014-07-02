@@ -4,9 +4,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Logger;
 
 import javax.persistence.EntityManager;
@@ -151,7 +154,7 @@ public class PostWindowControllerTest {
         }
     }
     
-  //Exception when persist error
+    //Exception when persist error
     @Test
     public void changeStateException2() throws Exception {
         Long id = new Long(10L);
@@ -171,5 +174,81 @@ public class PostWindowControllerTest {
         } catch (Exception e) {
             fail();
         }
+    }
+    
+    // Happy path
+    @Test
+    public void getPostsByToAndState() throws Exception {
+        Peer peer = createPeer("Peer");
+        Peer peerA = createPeer("PeerA");
+        Peer peerB = createPeer("PeerB");
+        Post postX = createPost("PostX", peerA);
+        Post postY = createPost("PostY", peerA);
+        Post postZ = createPost("PostY", peerB);
+        PostWindow postWin1 = createPostWindow(1L, peer, postX, PostWindow.State.PENDING);
+        PostWindow postWin2 = createPostWindow(2L, peer, postY, PostWindow.State.PENDING);
+        PostWindow postWin3 = createPostWindow(3L, peer, postZ, PostWindow.State.PENDING);
+        List<PostWindow> postWins = new ArrayList<PostWindow>();
+        postWins.add(postWin1);
+        postWins.add(postWin2);
+        postWins.add(postWin3);
+        when(db.getPostWindowDB().findByToAndState(peer.getUUID(), PostWindow.State.PENDING)).thenReturn(postWins);
+        
+        List<Post> posts = pwc.getPostsByToAndState(peer.getUUID(),PostWindow.State.PENDING , PostWindow.State.SENT);
+        assertEquals(3, posts.size());
+        for (PostWindow postWin: postWins) {
+            assertEquals(PostWindow.State.SENT, postWin.getState());
+        }
+        verify(em).persist(postWin1);
+        verify(em).persist(postWin2);
+        verify(em).persist(postWin3);
+    }
+    
+    // Happy path - when the state is equal, no persist is launch
+    @Test
+    public void getPostsByToAndStateEqualStates() throws Exception {
+        Peer peer = createPeer("Peer");
+        Peer peerA = createPeer("PeerA");
+        Peer peerB = createPeer("PeerB");
+        Post postX = createPost("PostX", peerA);
+        Post postY = createPost("PostY", peerA);
+        Post postZ = createPost("PostY", peerB);
+        PostWindow postWin1 = createPostWindow(1L, peer, postX, PostWindow.State.PENDING);
+        PostWindow postWin2 = createPostWindow(2L, peer, postY, PostWindow.State.PENDING);
+        PostWindow postWin3 = createPostWindow(3L, peer, postZ, PostWindow.State.PENDING);
+        List<PostWindow> postWins = new ArrayList<PostWindow>();
+        postWins.add(postWin1);
+        postWins.add(postWin2);
+        postWins.add(postWin3);
+        when(db.getPostWindowDB().findByToAndState(peer.getUUID(), PostWindow.State.PENDING)).thenReturn(postWins);
+        
+        List<Post> posts = pwc.getPostsByToAndState(peer.getUUID(),PostWindow.State.PENDING , PostWindow.State.PENDING);
+        assertEquals(3, posts.size());
+        for (PostWindow postWin: postWins) {
+            assertEquals(PostWindow.State.PENDING, postWin.getState());
+        }
+        verify(em,times(0)).persist((PostWindow)Matchers.anyObject());
+    }
+    
+    public PostWindow createPostWindow(Long id, Peer toPeer, Post post, PostWindow.State state) {
+        PostWindow postWin = new PostWindow();
+        postWin.setId(id);
+        postWin.setTo(toPeer);
+        postWin.setState(state);
+        postWin.setPost(post);
+        return postWin;
+    }
+    
+    public Peer createPeer(String UUID) {
+        Peer peer = new Peer();
+        peer.setUUID(UUID);
+        return peer;
+    }
+    
+    public Post createPost(String UUID, Peer fromPeer) {
+        Post post = new Post();
+        post.setUUID(UUID);
+        post.setFrom(fromPeer);
+        return post;
     }
 }
