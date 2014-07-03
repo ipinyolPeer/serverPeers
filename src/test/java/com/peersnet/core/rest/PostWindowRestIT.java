@@ -23,6 +23,7 @@ import com.peersnet.core.model.Peer;
 import com.peersnet.core.model.Post;
 import com.peersnet.core.model.PostWindow;
 import com.peersnet.core.service.PeerController;
+import com.peersnet.core.service.PostWindowController;
 
 @RunWith(Arquillian.class)
 public class PostWindowRestIT extends AbtractIT {
@@ -31,6 +32,9 @@ public class PostWindowRestIT extends AbtractIT {
     
     @Inject 
     PeerController peerController;
+    
+    @Inject
+    PostWindowController pwc;
     
     @Mock
     SecurityContext sc;
@@ -180,12 +184,12 @@ public class PostWindowRestIT extends AbtractIT {
         Response resp2 = postWindowRest.newPost(sc, postWinDTO);
         assertEquals(resp2.getStatus(),Response.Status.OK.getStatusCode());
         
-        // we create a post: peer B will post to peerA and peer C
+        // we create a post: peer B will post to peerA
         
         String M3 = "M3";
         List<String> aux3 = new ArrayList<String>();
         aux3.add(peerA.getUUID());
-        aux3.add(peerC.getUUID());
+        //aux3.add(peerC.getUUID());
         postWinDTO.message = M3;
         postWinDTO.url = "http://www.hola.com";
         postWinDTO.UUID_toList=aux3;
@@ -194,6 +198,7 @@ public class PostWindowRestIT extends AbtractIT {
         assertEquals(resp3.getStatus(),Response.Status.OK.getStatusCode());
         
         // Now we do the tested calls
+        // We gather posts for peer (only two) should be there
         when(principal.getName()).thenReturn(peer.getUUID());
         Response out = postWindowRest.getPosts(sc);
         assertEquals(out.getStatus(),Response.Status.OK.getStatusCode());
@@ -212,8 +217,40 @@ public class PostWindowRestIT extends AbtractIT {
         }
         assertEquals(1, a0);
         assertEquals(1, a1);
+        // Now whe check that the state have been properly modified
+        List<Post> posts = pwc.getPostsByToAndState(peer.getUUID(), PostWindow.State.SENT, PostWindow.State.SENT);
+        assertEquals(2, posts.size());
+        posts = pwc.getPostsByToAndState(peer.getUUID(), PostWindow.State.PENDING, PostWindow.State.PENDING);
+        assertEquals(0, posts.size());
+        posts = pwc.getPostsByToAndState(peer.getUUID(), PostWindow.State.ACK, PostWindow.State.ACK);
         
-        // TODO: Now we check that the state of checked messages have been 
+        // Now we do the same for PeerB, which only receives one
+        // We gather posts for peer (only two) should be there
+        when(principal.getName()).thenReturn(peerB.getUUID());
+        out = postWindowRest.getPosts(sc);
+        assertEquals(out.getStatus(),Response.Status.OK.getStatusCode());
+        postsDTO = (PostWindowRest.ReturnPostMessagesDTO) out.getEntity();
+        assertEquals(1,postsDTO.postsDTO.size());
+        assertEquals(M1,postsDTO.postsDTO.get(0).message);
+        // Now whe check that the state have been properly modified
+        posts = pwc.getPostsByToAndState(peerB.getUUID(), PostWindow.State.SENT, PostWindow.State.SENT);
+        assertEquals(1, posts.size());
+        posts = pwc.getPostsByToAndState(peerB.getUUID(), PostWindow.State.PENDING, PostWindow.State.PENDING);
+        assertEquals(0, posts.size());
+        posts = pwc.getPostsByToAndState(peerB.getUUID(), PostWindow.State.ACK, PostWindow.State.ACK);
+        
+        // Finally we do the same for peerC who does not receive anything
+        when(principal.getName()).thenReturn(peerC.getUUID());
+        out = postWindowRest.getPosts(sc);
+        assertEquals(out.getStatus(),Response.Status.OK.getStatusCode());
+        postsDTO = (PostWindowRest.ReturnPostMessagesDTO) out.getEntity();
+        assertEquals(0,postsDTO.postsDTO.size());
+        // Now whe check that the state have been properly modified
+        posts = pwc.getPostsByToAndState(peerC.getUUID(), PostWindow.State.SENT, PostWindow.State.SENT);
+        assertEquals(0, posts.size());
+        posts = pwc.getPostsByToAndState(peerC.getUUID(), PostWindow.State.PENDING, PostWindow.State.PENDING);
+        assertEquals(0, posts.size());
+        posts = pwc.getPostsByToAndState(peerC.getUUID(), PostWindow.State.ACK, PostWindow.State.ACK);
     }
     
     public PostWindow createPostWindow(Long id, Peer toPeer, Post post, PostWindow.State state) {
