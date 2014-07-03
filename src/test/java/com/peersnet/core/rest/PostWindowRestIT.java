@@ -20,6 +20,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.peersnet.core.model.Peer;
+import com.peersnet.core.model.Post;
+import com.peersnet.core.model.PostWindow;
 import com.peersnet.core.service.PeerController;
 
 @RunWith(Arquillian.class)
@@ -143,6 +145,85 @@ public class PostWindowRestIT extends AbtractIT {
         assertEquals(retDTO.numberOfMessages,0);
         assertEquals(retDTO.notSent.size(),1);
         assertEquals(retDTO.notSent.get(0), UUID_bad );
+    }
+    
+    @Test
+    public void getPostsIT() throws Exception {
+
+        // We create some peers
+        Peer peer = peerController.newPeer("testZ@test.com");
+        Peer peerA = peerController.newPeer("testAA@test.com");
+        Peer peerB = peerController.newPeer("testBB@test.com");
+        Peer peerC = peerController.newPeer("testCC@test.com");
+        
+        // We create a post: peerA will post to peer and peerB
+        String M1 = "M1";
+        List<String> aux = new ArrayList<String>();
+        aux.add(peer.getUUID());
+        aux.add(peerB.getUUID());
+        PostWindowRest.PostWindowDTO postWinDTO = new PostWindowRest.PostWindowDTO(); 
+        postWinDTO.message = M1;
+        postWinDTO.url = "http://www.hola.com";
+        postWinDTO.UUID_toList=aux;
+        when(principal.getName()).thenReturn(peerA.getUUID());    // To simulate authentication
+        Response resp = postWindowRest.newPost(sc, postWinDTO);
+        assertEquals(resp.getStatus(),Response.Status.OK.getStatusCode());
+        
+        // we create a post: peerC will post to peer
+        String M2 = "M2";
+        List<String> aux2 = new ArrayList<String>();
+        aux2.add(peer.getUUID());
+        postWinDTO.message = M2;
+        postWinDTO.url = "http://www.hola.com";
+        postWinDTO.UUID_toList=aux2;
+        when(principal.getName()).thenReturn(peerC.getUUID());    // To simulate authentication
+        Response resp2 = postWindowRest.newPost(sc, postWinDTO);
+        assertEquals(resp2.getStatus(),Response.Status.OK.getStatusCode());
+        
+        // we create a post: peer B will post to peerA and peer C
+        
+        String M3 = "M3";
+        List<String> aux3 = new ArrayList<String>();
+        aux3.add(peerA.getUUID());
+        aux3.add(peerC.getUUID());
+        postWinDTO.message = M3;
+        postWinDTO.url = "http://www.hola.com";
+        postWinDTO.UUID_toList=aux3;
+        when(principal.getName()).thenReturn(peerB.getUUID());    // To simulate authentication
+        Response resp3 = postWindowRest.newPost(sc, postWinDTO);
+        assertEquals(resp3.getStatus(),Response.Status.OK.getStatusCode());
+        
+        // Now we do the tested calls
+        when(principal.getName()).thenReturn(peer.getUUID());
+        Response out = postWindowRest.getPosts(sc);
+        assertEquals(out.getStatus(),Response.Status.OK.getStatusCode());
+        PostWindowRest.ReturnPostMessagesDTO postsDTO = (PostWindowRest.ReturnPostMessagesDTO) out.getEntity();
+        assertEquals(2,postsDTO.postsDTO.size());
+        int a0=0;
+        int a1=0;
+        for (PostWindowRest.ReturnPostMessageDTO p:postsDTO.postsDTO) {
+            if (p.UUID_from.equals(peerA.getUUID())){
+                assertEquals(M1,p.message);
+                a0++;
+            } else if (p.UUID_from.equals(peerC.getUUID())) {
+                assertEquals(M2,p.message);
+                a1++;
+            }
+        }
+        assertEquals(1, a0);
+        assertEquals(1, a1);
+        
+        // TODO: Now we check that the state of checked messages have been 
+    }
+    
+    public PostWindow createPostWindow(Long id, Peer toPeer, Post post, PostWindow.State state) {
+        PostWindow postWin = new PostWindow();
+        postWin.setId(id);
+        postWin.setTo(toPeer);
+        postWin.setState(state);
+        postWin.setPost(post);
+        
+        return postWin;
     }
     
 }

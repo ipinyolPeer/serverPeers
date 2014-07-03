@@ -175,7 +175,9 @@ public class PostWindowRest {
                 postDTO.message = post.getMessage();
                 postDTO.creationDate = post.getCreationDate();
                 postDTO.UUID_from = post.getFrom().getUUID();
-                postDTO.UUID_referTo = post.getReferTo().getUUID();
+                if (post.getReferTo()!= null) {
+                    postDTO.UUID_referTo = post.getReferTo().getUUID();
+                }
                 postsDTO.add(postDTO);
             }
         }
