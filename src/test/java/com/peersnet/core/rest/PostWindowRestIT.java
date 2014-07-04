@@ -151,6 +151,7 @@ public class PostWindowRestIT extends AbtractIT {
         assertEquals(retDTO.notSent.get(0), UUID_bad );
     }
     
+    // getPost and receivedAllPosts 
     @Test
     public void getPostsIT() throws Exception {
 
@@ -251,6 +252,41 @@ public class PostWindowRestIT extends AbtractIT {
         posts = pwc.getPostsByToAndState(peerC.getUUID(), PostWindow.State.PENDING, PostWindow.State.PENDING);
         assertEquals(0, posts.size());
         posts = pwc.getPostsByToAndState(peerC.getUUID(), PostWindow.State.ACK, PostWindow.State.ACK);
+        assertEquals(0, posts.size());
+        
+        // we check the method receivedAllPosts. We do it for peer
+        when(principal.getName()).thenReturn(peer.getUUID());
+        Response response =  postWindowRest.receivedAllPosts(sc);
+        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+        posts = pwc.getPostsByToAndState(peer.getUUID(), PostWindow.State.SENT, PostWindow.State.SENT);
+        assertEquals(0, posts.size());
+        posts = pwc.getPostsByToAndState(peer.getUUID(), PostWindow.State.PENDING, PostWindow.State.PENDING);
+        assertEquals(0, posts.size());
+        posts = pwc.getPostsByToAndState(peer.getUUID(), PostWindow.State.ACK, PostWindow.State.ACK);
+        assertEquals(2, posts.size());
+        
+        // We do the same for peerB
+        when(principal.getName()).thenReturn(peerB.getUUID());
+        response =  postWindowRest.receivedAllPosts(sc);
+        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+        posts = pwc.getPostsByToAndState(peerB.getUUID(), PostWindow.State.SENT, PostWindow.State.SENT);
+        assertEquals(0, posts.size());
+        posts = pwc.getPostsByToAndState(peerB.getUUID(), PostWindow.State.PENDING, PostWindow.State.PENDING);
+        assertEquals(0, posts.size());
+        posts = pwc.getPostsByToAndState(peerB.getUUID(), PostWindow.State.ACK, PostWindow.State.ACK);
+        assertEquals(1, posts.size());
+        
+        // And with peerC who do not have any 
+        when(principal.getName()).thenReturn(peerC.getUUID());
+        response =  postWindowRest.receivedAllPosts(sc);
+        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+        posts = pwc.getPostsByToAndState(peerC.getUUID(), PostWindow.State.SENT, PostWindow.State.SENT);
+        assertEquals(0, posts.size());
+        posts = pwc.getPostsByToAndState(peerC.getUUID(), PostWindow.State.PENDING, PostWindow.State.PENDING);
+        assertEquals(0, posts.size());
+        posts = pwc.getPostsByToAndState(peerC.getUUID(), PostWindow.State.ACK, PostWindow.State.ACK);
+        assertEquals(0, posts.size());
+        
     }
     
     public PostWindow createPostWindow(Long id, Peer toPeer, Post post, PostWindow.State state) {
